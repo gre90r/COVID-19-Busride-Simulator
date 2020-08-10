@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>COVID-19 ÖPNV Busride Simulator</title>
+
+  <meta name="description" content="Coronavirus Busride Simulator. Open source.">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link as="script" rel="preload" href="util/p5.min.js" />
+  <link as="script" rel="modulepreload" href="./app.js" />
+  <link as="script" rel="modulepreload" href="controller/options.js" />
+  <link as="script" rel="modulepreload" href="controller/dom.js" />
+  <link as="script" rel="modulepreload" href="controller/results.js" />
+
+  <!-- icon library for download button -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <style>
+    html {
+      box-sizing: border-box;
+    }
+
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+
+    #share {
+      position: fixed;
+      bottom: 16px;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px 0 0px 5px;
+      background: rgba(0, 153, 255, 0.25);
+      z-index: 1;
+      text-decoration: none;
+      font-size: 12px;
+      padding: 4px 16px;
+      color: #000;
+    }
+
+    #share:hover {
+      background: rgba(0, 153, 255, 0.5);
+    }
+
+    body {
+      align-items: center;
+      background-image: radial-gradient(#D7D7D7 1px, transparent 1px), radial-gradient(#d7d7d7 1px, transparent 1px);
+      background-position: 0 0, 25px 25px;
+      background-size: 50px 50px;
+      display: flex;
+      flex-direction: column;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      justify-content: center;
+      margin: 0 auto;
+      user-select: none;
+      width: 360px;
+    }
+
+    h1 {
+      font-size: 23px;
+      text-align: center;
+    }
+    h2 {
+      font-size: 18px;
+      text-align: center;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    canvas {
+      border: 1px solid #eee;
+    }
+
+    #graph {
+      margin-bottom: 1px;
+      transform: scaleY(-1);
+    }
+
+    #count {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
+    #count div {
+      margin-bottom: 16px;
+      padding: 0 10px;
+    }
+
+    #count span {
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    footer {
+      padding-bottom: 8px;
+      color: #777;
+      font-size: 12px;
+      margin-top: 1rem;
+    }
+
+    footer a {
+      color: #09f;
+      text-decoration: none;
+    }
+
+    form {
+      display: flex;
+      justify-content: space-around;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      align-items: center;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    input[type="radio"] + span {
+      border-radius: 50%;
+    }
+    input[type="radio"]:checked + span {
+      border: 1px solid #00004A;
+      padding: .5rem;
+    }
+
+    #canvas {
+      margin: auto;
+      padding-bottom: 16px;
+      position: relative;
+    }
+
+    #replay {
+      align-items: center;
+      background: rgba(255, 255, 255, .85);
+      cursor: pointer;
+      display: flex;
+      height: 100%;
+      font-weight: 500;
+      font-size: 21px;
+      justify-content: center;
+      position: absolute;
+      width: 100%;
+    }
+
+    #death-count {
+      display: none;
+    }
+
+    #death-count.show {
+      display: block;
+    }
+
+    /**********/
+    /* slider */
+    /**********/
+    .slidercontainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 100%; /* Width of the outside container */
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+    }
+    /* The slider itself */
+    .slider {
+      -webkit-appearance: none;  /* Override default CSS styles */
+      appearance: none;
+      width: 50%; /* Full-width */
+      height: 15px; /* Specified height */
+      border-radius: 5px;
+      background: #d3d3d3; /* Grey background */
+      outline: none; /* Remove outline */
+      opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+      -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+      transition: opacity .2s;
+      margin-right: 1rem;
+      margin-bottom: 1rem;
+    }
+    /* Mouse-over effects */
+    .slider:hover {
+      opacity: 1; /* Fully shown on mouse-over */
+    }
+    /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none; /* Override default look */
+      appearance: none;
+      width: 25px; /* Set a specific slider handle width */
+      height: 25px; /* Slider handle height */
+      border-radius: 50%;
+      background: #00bcd4; /* blue slider color */
+      cursor: pointer; /* Cursor on hover */
+    }
+    .slider::-moz-range-thumb {
+      width: 25px; /* Set a specific slider handle width */
+      height: 25px; /* Slider handle height */
+      border-radius: 50%;
+      background: #00bcd4; /* blue slider color */
+      cursor: pointer; /* Cursor on hover */
+    }
+    .sliderText {
+    }
+    .sliderValue {
+      font-size: 1.6rem;
+      margin-right: 0.5rem;
+    }
+    .sliderValueRow {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+    .simulationProgression {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+    #nextButton {
+      font-size: 1.2rem;
+      width: 100%;
+      height: 3rem;
+      background-color: #59ABE3;
+      color: white;
+      border-color: black;
+      border-width: 1px;
+      border-radius: 5px;
+    }
+    #nextButton:hover {
+      background-color: #489AD2
+    }
+    #nextButton:active {
+      background-color: #3789C1
+    }
+    #nextButton:disabled {
+      background-color: #888888
+    }
+    #csvDownloadArea {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1rem;
+      visibility: hidden;
+    }
+    .downloadButton {
+      text-decoration: none;
+      background-color: #59ABE3;
+      color: white;
+      padding: 12px 30px;
+      cursor: pointer;
+      font-size: 1rem;
+      border: solid black 1px;
+      border-radius: 5px;
+    }
+    .downloadButton:hover {
+      background-color: #489AD2;
+    }
+    .downloadButton:active {
+      background-color: #3789C1;
+    }
+
+    @media (min-width: 800px) {
+      body {
+        width: 800px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+    }
+
+  </style>
+  <script defer src="util/p5.min.js"></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <h1>COVID-19 ÖPNV Busride Simulator</h1>
+  <main>
+    <!-- Sliders -->
+    <section>
+      <article class="slidercontainer">
+        <h2>Preferences</h2>
+        <!-- guests enter per station -->
+        <div class="sliderValueRow">
+          <span id="guestsEnterPerStationValue" class="sliderValue">3</span>
+<!--          <label class="sliderText">Guests Enter Per Station</label>-->
+          <label class="sliderText">Mean number of guests entering per station</label>
+        </div>
+        <input id="guestsEnterPerStationSlider" type="range" min="0" max="10" value="3" class="slider">
+        <!-- standard deviation -->
+        <div class="sliderValueRow">
+          <span id="guestsEnterPerStationDeviationValue" class="sliderValue">5</span>
+<!--          <label class="sliderText">Standard Deviation Guests Enter Per Station</label>-->
+          <label class="sliderText">Standard deviation for number of guests entering per station</label>
+        </div>
+        <input id="guestsEnterPerStationDeviationSlider" type="range" min="0" max="20" value="5" class="slider">
+
+        <!-- guests leave per station -->
+        <div class="sliderValueRow">
+          <span id="guestsLeavePerStationValue" class="sliderValue">1</span>
+<!--          <label class="sliderText">Guests Leave Per Station</label>-->
+          <label class="sliderText">Mean number of guests leaving per station</label>
+        </div>
+        <input id="guestsLeavePerStationSlider" type="range" min="0" max="10" value="1" class="slider">
+        <!-- standard deviation -->
+        <div class="sliderValueRow">
+          <span id="guestsLeavePerStationDeviationValue" class="sliderValue">5</span>
+<!--          <label class="sliderText">Standard Deviation Guests Leave Per Station</label>-->
+          <label class="sliderText">Standard deviation for number of guests leaving per station</label>
+        </div>
+        <input id="guestsLeavePerStationDeviationSlider" type="range" min="0" max="20" value="5" class="slider">
+
+        <div class="sliderValueRow">
+          <span id="chanceOfInfectedGuestValue" class="sliderValue">10%</span>
+          <label class="sliderText">chance of infected guest</label>
+        </div>
+        <input id="chanceOfInfectedGuestSlider" type="range" min="0" max="100" value="10" class="slider">
+
+        <div class="sliderValueRow">
+          <span id="stationsValue" class="sliderValue">7</span>
+          <label class="sliderText">stations</label>
+        </div>
+        <input id="stationsSlider" type="range" min="2" max="50" value="7" class="slider">
+
+        <!-- travel time to next station -->
+        <div class="sliderValueRow">
+          <span id="distanceToNextStationValue" class="sliderValue">3 minutes</span>
+<!--          <label class="sliderText">Travel Time to Next Station</label>-->
+          <label class="sliderText">Mean travel time to next station</label>
+        </div>
+        <input id="distanceToNextStationSlider" type="range" min="1" max="10" value="3" class="slider">
+        <!-- standard deviation -->
+        <div class="sliderValueRow">
+          <span id="distanceToNextStationDeviationValue" class="sliderValue">5</span>
+<!--          <label class="sliderText">Standard Deviation Travel Time to Next Station</label>-->
+          <label class="sliderText">Standard deviation for travel time to next station</label>
+        </div>
+        <input id="distanceToNextStationDeviationSlider" type="range" min="0" max="20" value="5" class="slider">
+
+        <div class="sliderValueRow">
+          <span id="contactRadiusValue" class="sliderValue">2 meters</span>
+          <label class="sliderText">contact radius</label>
+        </div>
+        <input id="contactRadiusSlider" type="range" min="1" max="10" value="2" class="slider">
+
+        <div class="sliderValueRow">
+          <span id="contactTimeValue" class="sliderValue">20 minutes</span>
+          <label class="sliderText">contact time</label>
+        </div>
+        <input id="contactTimeSlider" type="range" min="1" max="60" value="20" class="slider">
+      </article>
+
+      <!-- option: automatic progression or step through -->
+      <article class="slidercontainer">
+        <h2>Automatic Simulation Progression</h2>
+        <div class="simulationProgression">
+          <label>
+            <input type="radio" name="simulationProgression" value="automated" id="rbAutomated" checked>
+            <span>automatic</span>
+          </label>
+          <label>
+            <input type="radio" name="simulationProgression" value="stepThrough" id="rbStepThrough">
+            <span>step through</span>
+          </label>
+        </div>
+
+        <div class="sliderValueRow">
+          <span id="simulationSpeedValue" class="sliderValue">1x</span>
+          <label class="sliderText">simulation speed</label>
+        </div>
+        <input id="simulationSpeedSlider" type="range" min="1" max="10" value="1" class="slider">
+      </article>
+    </section>
+
+    <!-- Metrics -->
+    <section>
+      <article>
+        <h2>Metrics</h2>
+        <div id="count">
+          <div>Guests<br /><span id="numGuests">0</span></div>
+          <div>Current Healthy<br /><span id="healthy">0</span></div>
+          <div>Current Infected<br /><span id="infected">0</span></div>
+          <div>New Infections<br /><span id="newInfections">0</span></div>
+          <div>Incoming Healthy<br /><span id="incomingHealthy">0</span></div>
+          <div>Incoming Infected<br /><span id="incomingInfected">0</span></div>
+          <div>Outgoing Healthy<br /><span id="outgoingHealthy">0</span></div>
+          <div>Outgoing Infected<br /><span id="outgoingInfected">0</span></div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Busride State -->
+    <section>
+      <!-- Station 1 of X -->
+      <div>
+        Station
+        <span id="currentStation">1</span>
+        of
+        <span id="totalStations">7</span>
+      </div>
+      <!-- display busride state -->
+      <div>
+        <span>Busride State: </span>
+        <span id="busrideState">Application Start</span>
+      </div>
+      <!-- drive time -->
+      <div>
+        <span>Drive Time: </span>
+        <span id="driveTime">0 </span>
+        minutes
+      </div>
+    </section>
+
+    <!-- CANVAS -->
+    <section>
+      <div id="canvas"></div>
+    </section>
+
+    <!-- csv download -->
+    <div id="csvDownloadArea">
+      <a id="csvDownloadLink" class="downloadButton" href="#">
+        <i class="fa fa-download"></i> Download CSV</a>
+    </div>
+
+    <!-- next button -->
+    <div>
+      <button id="nextButton" type="button">Start</button>
+    </div>
+  </main>
+  
+  <footer>
+    Based on <a target="_blank" rel="noopener nofollow" href='https://github.com/midudev/covid-19-spread-simulator'>midudev's simulator</a> | 
+             <a href='https://github.com/gre90r/COVID-19-Busride-Simulator' target="_blank" rel="noopener nofollow">Source Code</a> | 
+             By gre90r
+  </footer>
+</body>
+</html>

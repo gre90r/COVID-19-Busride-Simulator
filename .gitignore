@@ -1,0 +1,26 @@
+# installed dependencies
+node_modules
+
+package-lock.json
+
+# code coverage results
+.nyc_output/
+
+# open office documents
+*.odp
+*.odt
+*.ods
+
+# StarUML files
+*.mdj
+
+# GIMP files
+*.xcf
+
+# Pencil files
+*.epgz
+
+# other
+Gaussverteilung.svg
+busrideMetrics_20200714125258.ods
+

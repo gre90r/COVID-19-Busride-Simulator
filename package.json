@@ -1,0 +1,71 @@
+{
+  "name": "coronavirus-spread-simulator",
+  "version": "1.0.1",
+  "private": true,
+  "description": "Simulator about how Coronavirus spreads with free movement of people and confinement",
+  "main": "",
+  "scripts": {
+    "build": "npm run create:public && npm run minify:files",
+    "create:public": "mkdir -p public",
+    "minify:files": "cd src && for f in $(find -type f); do mkdir -p \"../public/$(dirname \"$f\")\" ; minify $f > ../public/$f; done;",
+    "copy:assets": "cp -r ./assets/ ./public/assets",
+    "lint": "eslint src",
+    "dev": "servor src index.html 1234 --browser --reload",
+    "test": "./node_modules/mocha/bin/mocha -r @babel/register -r babel-polyfill",
+    "ui-test": "./node_modules/mocha/bin/mocha -r @babel/register ./test/ui --timeout 45000",
+    "coverage": "nyc mocha -r @babel/register -r babel-polyfill"
+  },
+  "keywords": [],
+  "author": "Miguel Ángel Durán García - https://midu.dev",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
+    "@types/selenium-webdriver": "^4.0.9",
+    "@types/sinon": "^9.0.0",
+    "babel": "^6.23.0",
+    "babel-eslint": "^10.1.0",
+    "babel-polyfill": "^6.26.0",
+    "chai": "^4.2.0",
+    "husky": "4.2.3",
+    "minify": "5.1.0",
+    "mocha": "^7.1.2",
+    "nyc": "^15.0.1",
+    "selenium-webdriver": "^4.0.0-alpha.7",
+    "servor": "3.2.0",
+    "sinon": "^9.0.2",
+    "standard": "14.3.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint",
+      "pre-push": "npm run lint"
+    }
+  },
+  "eslintConfig": {
+    "parser": "babel-eslint",
+    "extends": "eslint-config-standard",
+    "rules": {
+      "indent": [
+        "error",
+        2
+      ],
+      "max-len": [
+        "error",
+        {
+          "code": 100
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "@babel/core": "^7.9.6",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.9.6",
+    "@babel/register": "^7.9.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.1.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1"
+  }
+}
