@@ -1,3 +1,5 @@
+![CI](https://github.com/gre90r/COVID-19-Busride-Simulator/workflows/CI/badge.svg)
+
 # COVID-19 ÖPNV Busride Simulator
 The COVID-19 ÖPNV Busride Simulator simulates busrides with healthy
 guests and guests who are infected with COVID-19. Feel free to
